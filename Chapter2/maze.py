@@ -13,11 +13,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from enum import Enum
-from typing import List, NamedTuple, Callable, Optional
 import random
+from enum import Enum
 from math import sqrt
-from generic_search import dfs, bfs, node_to_path, astar, Node
+from typing import List, NamedTuple, Callable, Optional
+from Chapter2.generic_search import dfs, bfs, node_to_path, astar, Node
 
 
 class Cell(str, Enum):
@@ -34,14 +34,15 @@ class MazeLocation(NamedTuple):
 
 
 class Maze:
-    def __init__(self, rows: int = 10, columns: int = 10, sparseness: float = 0.2, start: MazeLocation = MazeLocation(0, 0), goal: MazeLocation = MazeLocation(9, 9)) -> None:
+    def __init__(self, rows: int = 10, columns: int = 10, sparseness: float = 0.2,
+                 start: MazeLocation = MazeLocation(0, 0), goal: MazeLocation = MazeLocation(9, 9)) -> None:
         # initialize basic instance variables
         self._rows: int = rows
         self._columns: int = columns
         self.start: MazeLocation = start
         self.goal: MazeLocation = goal
         # fill the grid with empty cells
-        self._grid: List[List[Cell]] = [[Cell.EMPTY for c in range(columns)] for r in range(rows)]
+        self._grid: List[List[Cell]] = [[Cell.EMPTY for _ in range(columns)] for _ in range(rows)]
         # populate the grid with blocked cells
         self._randomly_fill(rows, columns, sparseness)
         # fill the start and goal locations in
@@ -81,7 +82,7 @@ class Maze:
             self._grid[maze_location.row][maze_location.column] = Cell.PATH
         self._grid[self.start.row][self.start.column] = Cell.START
         self._grid[self.goal.row][self.goal.column] = Cell.GOAL
-    
+
     def clear(self, path: List[MazeLocation]):
         for maze_location in path:
             self._grid[maze_location.row][maze_location.column] = Cell.EMPTY
@@ -90,19 +91,21 @@ class Maze:
 
 
 def euclidean_distance(goal: MazeLocation) -> Callable[[MazeLocation], float]:
-    def distance(ml: MazeLocation) -> float:
+    def inner_distance(ml: MazeLocation) -> float:
         xdist: int = ml.column - goal.column
         ydist: int = ml.row - goal.row
-        return sqrt((xdist * xdist) + (ydist * ydist))
-    return distance
+        return sqrt(xdist * xdist + ydist * ydist)
+
+    return inner_distance
 
 
 def manhattan_distance(goal: MazeLocation) -> Callable[[MazeLocation], float]:
-    def distance(ml: MazeLocation) -> float:
+    def inner_distance(ml: MazeLocation) -> float:
         xdist: int = abs(ml.column - goal.column)
         ydist: int = abs(ml.row - goal.row)
-        return (xdist + ydist)
-    return distance
+        return xdist + ydist
+
+    return inner_distance
 
 
 if __name__ == "__main__":
